@@ -14,23 +14,32 @@ parser.add_argument('--script', help='Specify which filter script to use')
 parser.add_argument('--ips', help='filter on ip or cidr block, specify single ip or a cidr range')
 args=parser.parse_args()
 
-def get_ports():
+def get_ports(hosts):
     """
     Get a list of open ports for each hostname
     Each hostname will only take up one line
     Which makes for a compact format
+    Accepts an object of type xmltree as returned by filter_ips()
     """
-    hosts = filter_ips(args.nmap_file, args.ips)
     for host in hosts:
         ports = [port.attrib['portid'] for port in host.find('ports').findall('port')]
         print(f"{host.find('address').attrib['addr']}: {','.join(ports)}")
 
-def get_services():
+def get_hosts(hosts):
+    """
+    Get only the live hosts, one per line. This is usefull when
+    scanning the network in stages (eg using -sn)
+    Accepts an object of type xmltree as returned by filter_ips()
+    """
+    for host in hosts:
+        print(host.find('address').attrib['addr'])
+
+def get_services(hosts):
     """
     Get a list of open ports with service details
     Supports multiple hostnames per file
+    Accepts an object of type xmltree as returned by filter_ips()
     """
-    hosts = filter_ips(args.nmap_file, args.ips)
     for host in hosts:
         print(host.find('address').attrib['addr'])
         ports = [port for port in host.find('ports').findall('port')]
@@ -62,6 +71,8 @@ def filter_ips(nmap_file, ip_filter):
     
 if __name__ == "__main__":
     if args.script == "get_services":
-        get_services()
+        get_services(filter_ips(args.nmap_file, args.ips))
+    elif args.script == "get_hosts":
+        get_hosts(filter_ips(args.nmap_file, args.ips))
     else:
-        get_ports()
+        get_ports(filter_ips(args.nmap_file, args.ips))
