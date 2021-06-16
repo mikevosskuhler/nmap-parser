@@ -9,10 +9,10 @@ Your nmap scan always has to include a -oX to get XML output
 """
 
 parser=argparse.ArgumentParser()
-parser.add_argument('nmap_file', help='Nmap XML formatted output file')
-parser.add_argument('--script', '-s', help='Specify which filter script to use', 
+parser.add_argument('nmap_file', help='Nmap XML formatted output file.')
+parser.add_argument('--script', '-s', help='Specify which filter script to use. Default is get_ports.', 
                     choices=['get_ports', 'get_hosts', 'get_services', 'get_http_urls'])
-parser.add_argument('--ips', '-i', help='filter on ip or cidr block, specify single ip or a cidr range')
+parser.add_argument('--ips', '-i', help='Filter on IP or CIDR block, specify single IP or a CIDR range.')
 args=parser.parse_args()
 
 def get_ports(hosts):
@@ -53,8 +53,9 @@ def get_services(hosts):
 
 def get_http_urls(hosts):
     """
-    Get a list of URLs in the form http(s)://xxx.abc.
+    Get a list of URLs in the form http(s)://<IP>:<PORT>.
     Only http or https URLs will be listed! 
+    Accepts an object of type xmltree as returned by filter_ips()
     """
     for host in hosts:
         host_addr = host.find('address').attrib['addr']

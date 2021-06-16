@@ -15,16 +15,17 @@ sudo chmod +x /usr/local/bin/nmap-parser
 ```
 ## Usage
 ```
-└─$ nmap-parser -h                                                             2 ⨯
-usage: nmap-parser [-h] [--script SCRIPT] [--ips IPS] nmap_file
+└─$ nmap-parser -h
+usage: nmap-parser [-h] [--script {get_ports,get_hosts,get_services,get_http_urls}] [--ips IPS] nmap_file
 
 positional arguments:
-  nmap_file        Nmap XML formatted output file
+  nmap_file             Nmap XML formatted output file.
 
 optional arguments:
-  -h, --help       show this help message and exit
-  --script SCRIPT  Specify which filter script to use
-  --ips IPS        filter on ip or cidr block, specify single ip or a cidr range
+  -h, --help            show this help message and exit
+  --script {get_ports,get_hosts,get_services,get_http_urls}, -s {get_ports,get_hosts,get_services,get_http_urls}
+                        Specify which filter script to use. Default is get_ports.
+  --ips IPS, -i IPS     Filter on IP or CIDR block, specify single IP or a CIDR range.
 ```
 ## Example
 ```
