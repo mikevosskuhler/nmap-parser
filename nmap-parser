@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/env python3
 import xml.etree.ElementTree as ET
 import argparse, sys
 import ipaddress
@@ -10,8 +10,9 @@ Your nmap scan always has to include a -oX to get XML output
 
 parser=argparse.ArgumentParser()
 parser.add_argument('nmap_file', help='Nmap XML formatted output file')
-parser.add_argument('--script', help='Specify which filter script to use')
-parser.add_argument('--ips', help='filter on ip or cidr block, specify single ip or a cidr range')
+parser.add_argument('--script', '-s', help='Specify which filter script to use', 
+                    choices=['get_ports', 'get_hosts', 'get_services', 'get_http_urls'])
+parser.add_argument('--ips', '-i', help='filter on ip or cidr block, specify single ip or a cidr range')
 args=parser.parse_args()
 
 def get_ports(hosts):
@@ -50,6 +51,20 @@ def get_services(hosts):
                     services += f"{attrib}: {service.attrib[attrib]}, "
             print(f"{port.attrib['portid']} || {services[:-2]}")
 
+def get_http_urls(hosts):
+    """
+    Get a list of URLs in the form http(s)://xxx.abc.
+    Only http or https URLs will be listed! 
+    """
+    for host in hosts:
+        host_addr = host.find('address').attrib['addr']
+        ports = [port for port in host.find('ports').findall('port')]
+        for port in ports:
+            for service in port.findall('service'):
+                service_name = service.attrib.get('name')
+                if service_name in ['http', 'https']:
+                    print(f"{service_name}://{host_addr}:{port.attrib['portid']}")
+
 def filter_ips(nmap_file, ip_filter):
     """
     Filter the nmap output based on ip or cidr block
@@ -74,5 +89,7 @@ if __name__ == "__main__":
         get_services(filter_ips(args.nmap_file, args.ips))
     elif args.script == "get_hosts":
         get_hosts(filter_ips(args.nmap_file, args.ips))
+    elif args.script == "get_http_urls":
+        get_http_urls(filter_ips(args.nmap_file, args.ips))
     else:
         get_ports(filter_ips(args.nmap_file, args.ips))
